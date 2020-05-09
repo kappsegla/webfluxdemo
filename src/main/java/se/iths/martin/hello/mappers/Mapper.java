@@ -9,7 +9,7 @@ import se.iths.martin.hello.records.Measure;
 //https://www.baeldung.com/java-performance-mapping-frameworks
 
 @Service
-public class ModelMapper {
+public class Mapper {
     public Doc map(Sample sample) {
         return new Doc(null,sample.getUpdated(),sample.getStationID(),sample.getName(),sample.getHeading(),sample.getValue().split(" ")[1]);
     }

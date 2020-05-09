@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import se.iths.martin.hello.mappers.ModelMapper;
+import se.iths.martin.hello.mappers.Mapper;
 import se.iths.martin.hello.models.Sample;
 import se.iths.martin.hello.models.SingleStation;
 import se.iths.martin.hello.repositories.DocReactiveRepository;
@@ -34,10 +33,10 @@ public class ScheduledTasks {
     final
     DocReactiveRepository reactiveRepository;
 
-    private final ModelMapper modelMapper;
+    private final Mapper modelMapper;
 
 
-    public ScheduledTasks(ObjectMapper mapper, DocReactiveRepository repository, ModelMapper modelMapper) {
+    public ScheduledTasks(ObjectMapper mapper, DocReactiveRepository repository, Mapper modelMapper) {
         this.mapper = mapper;
         this.reactiveRepository = repository;
         this.modelMapper = modelMapper;

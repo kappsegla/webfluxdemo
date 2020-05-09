@@ -3,7 +3,7 @@ package se.iths.martin.hello;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import se.iths.martin.hello.mappers.ModelMapper;
+import se.iths.martin.hello.mappers.Mapper;
 import se.iths.martin.hello.models.Doc;
 import se.iths.martin.hello.records.Measure;
 import se.iths.martin.hello.repositories.DocReactiveRepository;
@@ -14,9 +14,9 @@ public class DocController {
 
     private final DocReactiveRepository repository;
 
-    private final ModelMapper modelMapper;
+    private final Mapper modelMapper;
 
-    public DocController(DocReactiveRepository repository, ModelMapper modelMapper) {
+    public DocController(DocReactiveRepository repository, Mapper modelMapper) {
         this.repository = repository;
         this.modelMapper = modelMapper;
     }
