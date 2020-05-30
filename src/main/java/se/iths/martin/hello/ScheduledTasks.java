@@ -2,6 +2,7 @@ package se.iths.martin.hello;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import se.iths.martin.hello.repositories.DocReactiveRepository;
 import java.io.IOException;
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 public class ScheduledTasks {
@@ -35,11 +37,42 @@ public class ScheduledTasks {
 
     private final Mapper modelMapper;
 
+    //baeldung.com/java-mqtt-client
+    String publisherId = UUID.randomUUID().toString();
+    private final static String TOPIC = "/test";
+    IMqttClient publisher;
 
     public ScheduledTasks(ObjectMapper mapper, DocReactiveRepository repository, Mapper modelMapper) {
         this.mapper = mapper;
         this.reactiveRepository = repository;
         this.modelMapper = modelMapper;
+        try {
+            publisher = new MqttClient("tcp://192.168.1.109:1883", publisherId);
+
+            MqttConnectOptions options = new MqttConnectOptions();
+            options.setAutomaticReconnect(true);
+            options.setCleanSession(true);
+            options.setConnectionTimeout(10);
+            publisher.connect(options);
+
+            //Subscribe
+            publisher.subscribe(TOPIC,(topic, msg)->
+            {
+                byte[] payload = msg.getPayload();
+                String p = new String(payload);
+                log.info("Recieved message: "
+                 + p);
+
+            });
+
+
+
+        } catch (MqttException e) {
+            log.debug(e.getMessage());
+        }
+
+
+
     }
 
     @Scheduled(fixedRate = 60000)
@@ -53,6 +86,16 @@ public class ScheduledTasks {
                 .bodyToMono(String.class)
                 .doOnNext(this::doIt)
                 .subscribe();
+
+        //Send message to mqtt server
+        MqttMessage msg = new MqttMessage("This is a message".getBytes());
+        msg.setQos(2);
+        msg.setRetained(true);
+        try {
+            publisher.publish(TOPIC,msg);
+        } catch (MqttException e) {
+            log.debug(e.getMessage());
+        }
     }
 
     private void doIt(String json) {
@@ -79,8 +122,8 @@ public class ScheduledTasks {
 //                .map(modelMapper::map)
 //                .
         for (Sample sample : singleStation.getSamples()) {
-            if ( sample.getName().equals("Medelvind") ) {
-                reactiveRepository.save( modelMapper.map(sample) )
+            if (sample.getName().equals("Medelvind")) {
+                reactiveRepository.save(modelMapper.map(sample))
                         .subscribe(result -> log.info("Entity has been saved: {}", result));
             }
         }
